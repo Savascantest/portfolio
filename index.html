@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth scroll-pt-20">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Savaşcan Türken | Educational Technology Researcher</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"DM Sans"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif'],
+          },
+          colors: {
+            navy: {
+              DEFAULT: '#1a2744',
+              mid: '#243259',
+              light: '#3a5fa0'
+            },
+            amber: {
+              DEFAULT: '#c8843a',
+              light: '#e8a55a'
+            },
+            cream: {
+              DEFAULT: '#f7f4ef',
+              light: '#fdfbf8'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    /* Smooth card hover transitions */
+    .project-card {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .project-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 50px -12px rgba(26, 39, 68, 0.15);
+      border-color: rgba(200, 132, 58, 0.3);
+    }
+  </style>
+</head>
+<body class="bg-cream-light text-gray-800 font-sans antialiased selection:bg-amber selection:text-white">
+
+  <!-- Navigation -->
+  <nav class="fixed w-full z-50 bg-cream-light/90 backdrop-blur-md border-b border-navy/10 transition-all duration-300">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-20">
+        <!-- Subtle Logo Design -->
+        <div class="flex-shrink-0">
+          <a href="#" class="flex flex-col justify-center group">
+            <span class="font-serif text-2xl font-bold text-navy tracking-tight leading-none group-hover:text-amber transition-colors">S. Türken</span>
+            <span class="text-[10px] font-sans text-gray-500 tracking-widest uppercase mt-1.5 leading-none font-semibold">EdTech & Learning Design</span>
+          </a>
+        </div>
+        <div class="hidden md:flex space-x-8 items-center">
+          <a href="#about" class="text-gray-600 hover:text-amber transition-colors text-sm font-medium">About</a>
+          <a href="#experience" class="text-gray-600 hover:text-amber transition-colors text-sm font-medium">Experience</a>
+          <a href="#projects" class="text-gray-600 hover:text-amber transition-colors text-sm font-medium">Portfolio</a>
+          <a href="#contact" class="bg-navy text-white px-5 py-2.5 rounded-full hover:bg-navy-mid transition-all shadow-md text-sm font-medium">Get in Touch</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="max-w-4xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber/10 text-amber border border-amber/20 mb-6">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-amber"></span>
+          </span>
+          <span class="text-xs font-semibold tracking-wide uppercase">Open to Opportunities in EdTech R&D</span>
+        </div>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-navy leading-tight mb-6">
+          Educational Technology & Learning Design Specialist <span class="text-navy-light opacity-80 font-normal">|</span> <span class="text-navy-light">Language Educator</span>
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-600 mb-10 leading-relaxed font-light">
+          Bridging Education, Technology, and Human-Centered Learning.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href="#projects" class="bg-amber hover:bg-amber-light text-white px-8 py-3.5 rounded-full font-medium transition-all shadow-lg shadow-amber/30 flex items-center gap-2">
+            View My Work <i class="ph ph-arrow-right"></i>
+          </a>
+          <a href="#contact" class="bg-white text-navy border border-navy/20 hover:border-navy hover:bg-cream px-8 py-3.5 rounded-full font-medium transition-all flex items-center gap-2">
+            Connect With Me
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Decorative background elements -->
+    <div class="absolute top-0 right-0 -mr-48 -mt-48 w-96 h-96 rounded-full bg-amber/5 blur-3xl"></div>
+    <div class="absolute bottom-0 right-20 w-64 h-64 rounded-full bg-navy-light/5 blur-3xl"></div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="py-20 bg-cream">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-12 gap-12 items-center">
+        <!-- Photo Element (Left Sidebar) -->
+        <div class="md:col-span-4 space-y-6">
+          <div class="aspect-square rounded-2xl bg-gradient-to-br from-navy to-navy-light shadow-xl p-1 flex items-center justify-center relative overflow-hidden group">
+             <!-- Placeholder for your actual photo -->
+             <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=800')] bg-cover bg-center mix-blend-overlay opacity-40 group-hover:scale-105 transition-transform duration-700"></div>
+             <div class="text-center relative z-10 text-white p-6">
+                <i class="ph ph-brain text-6xl text-amber mb-4"></i>
+                <h3 class="font-serif text-2xl font-bold">MSc & MA</h3>
+                <p class="text-sm text-cream opacity-80 mt-2">Dual Master's Degrees</p>
+             </div>
+          </div>
+        </div>
+
+        <!-- About Text (Right) -->
+        <div class="md:col-span-8">
+          <h2 class="text-sm font-bold text-amber tracking-widest uppercase mb-2">About Me</h2>
+          <h3 class="text-3xl font-serif font-bold text-navy mb-6">MSc in Smart EdTech | MA in Language Teaching</h3>
+          
+          <div class="space-y-5 text-gray-600 leading-relaxed mb-8">
+            <p>
+              I am a language educator and educational technology professional with experience in digital learning, AI systems evaluation and annotation work, and learner-centered instructional design. My work combines practical teaching experience with academic training in learning sciences and educational technology.
+            </p>
+            <p>
+              With over eight years of experience teaching English and French in both classroom and online environments, I am particularly drawn to questions about how technology can be designed to meaningfully change what learners do, not just digitize existing instruction.
+            </p>
+            <p>
+              What defines my background is holding both a teaching qualification and an EdTech research degree simultaneously; I was designing lessons and studying learning systems at the same time. My areas of focus include adaptive learning, AI in education, instructional design, and digital pedagogy.
+            </p>
+            <p>
+              Currently based in Essen, Germany, I am open to opportunities in educational technology research, instructional design, AI-supported learning, learning experience design, and academic project development.
+            </p>
+          </div>
+          
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="flex items-start gap-3">
+              <i class="ph-fill ph-check-circle text-amber text-xl mt-1"></i>
+              <div>
+                <h4 class="font-bold text-navy">M.Sc. Smart-EdTech, Co-Creativity and Digital Tools for Educational Innovation</h4>
+                <p class="text-sm text-gray-500">Université Côte d'Azur</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <i class="ph-fill ph-check-circle text-amber text-xl mt-1"></i>
+              <div>
+                <h4 class="font-bold text-navy">MA French Language Teaching</h4>
+                <p class="text-sm text-gray-500">Marmara University</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Experience & Skills Section -->
+  <section id="experience" class="py-20 bg-cream-light">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <h2 class="text-sm font-bold text-amber tracking-widest uppercase mb-2">Professional Experience</h2>
+        <h3 class="text-3xl font-serif font-bold text-navy">Education, Technology & Research Experience</h3>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-12">
+        <!-- Timeline -->
+        <div class="lg:col-span-2 space-y-8">
+          
+          <!-- Job 1 -->
+          <div class="relative pl-8 before:absolute before:left-0 before:top-2 before:bottom-0 before:w-0.5 before:bg-navy/10">
+            <div class="absolute left-[-5px] top-2 h-3 w-3 rounded-full bg-amber border-2 border-cream-light shadow"></div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:border-amber/30 transition-colors">
+              <span class="text-sm font-bold text-amber mb-1 block">October 2023 – January 2026</span>
+              <h4 class="text-xl font-bold text-navy">Co-Founder & EdTech Advisor</h4>
+              <p class="text-gray-500 text-sm mb-4">Ultra Smart School | Remote</p>
+              <ul class="space-y-2 text-gray-600 text-sm list-disc list-inside ml-2">
+                <li>Co-founded an online language learning platform focused on asynchronous education.</li>
+                <li>Led instructional design initiatives and the creation of structured educational materials.</li>
+                <li>Designed comprehensive curricula and planned learner experiences to optimize engagement and language acquisition.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Job 2 -->
+          <div class="relative pl-8 before:absolute before:left-0 before:top-2 before:bottom-0 before:w-0.5 before:bg-navy/10">
+            <div class="absolute left-[-5px] top-2 h-3 w-3 rounded-full bg-navy-light border-2 border-cream-light shadow"></div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:border-navy-light/30 transition-colors">
+              <span class="text-sm font-bold text-navy-light mb-1 block">April 2022 – January 2026</span>
+              <h4 class="text-xl font-bold text-navy">AI Data Solutions Evaluator / Linguist</h4>
+              <p class="text-gray-500 text-sm mb-4">Lionbridge | Remote</p>
+              <ul class="space-y-2 text-gray-600 text-sm list-disc list-inside ml-2">
+                <li>Evaluated search queries, online content, and AI-generated responses.</li>
+                <li>Contributed to AI model evaluation projects, including Microsoft Copilot-related tasks.</li>
+                <li>Produced high-quality multilingual data through transcription, annotation, and quality assurance processes.</li>
+                <li>Worked on projects involving AI language systems and esports transcription.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Job 3 (Combined Teaching Experience) -->
+          <div class="relative pl-8">
+            <div class="absolute left-[-5px] top-2 h-3 w-3 rounded-full bg-gray-300 border-2 border-cream-light shadow"></div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:border-gray-300 transition-colors">
+              <span class="text-sm font-bold text-gray-500 mb-1 block">2018 – January 2026</span>
+              <h4 class="text-xl font-bold text-navy">Language Educator</h4>
+              <p class="text-gray-500 text-sm mb-4">Skyeng | British English | Independent Language Teaching</p>
+              <ul class="space-y-2 text-gray-600 text-sm list-disc list-inside ml-2">
+                <li>Delivered online and in-person language instruction to diverse age groups and adult learners.</li>
+                <li>Adapted lessons to different proficiency levels and specific learning goals using communicative and active approaches.</li>
+                <li>Utilized digital teaching platforms and interactive learning tools to enhance student engagement.</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Skills Grid -->
+        <div class="lg:col-span-1">
+          <div class="bg-navy rounded-3xl p-8 text-white shadow-xl sticky top-28">
+            <h4 class="font-serif text-2xl font-bold mb-6 flex items-center gap-2">
+              <i class="ph ph-lightning text-amber"></i> Core Competencies
+            </h4>
+            
+            <div class="space-y-6">
+              <!-- Areas of Interest -->
+              <div>
+                <h5 class="text-xs text-navy-light font-bold uppercase tracking-wider mb-3">Educational Technology</h5>
+                <div class="flex flex-wrap gap-2">
+                  <span class="px-2.5 py-1 bg-navy-mid rounded text-xs">Adaptive Learning Systems</span>
+                  <span class="px-2.5 py-1 bg-navy-mid rounded text-xs">AI in Education</span>
+                  <span class="px-2.5 py-1 bg-navy-mid rounded text-xs">Digital Learning Design</span>
+                  <span class="px-2.5 py-1 bg-navy-mid rounded text-xs">Learning Sciences</span>
+                </div>
+              </div>
+              
+              <!-- Research Skills -->
+              <div>
+                <h5 class="text-xs text-navy-light font-bold uppercase tracking-wider mb-3">Research</h5>
+                <div class="flex flex-wrap gap-2">
+                  <span class="px-2.5 py-1 bg-navy-mid rounded text-xs border border-amber/30 text-amber-light">Qualitative Research</span>
+                  <span class="px-2.5 py-1 bg-navy-mid rounded text-xs border border-amber/30 text-amber-light">Thematic Analysis</span>
+                  <span class="px-2.5 py-1 bg-navy-mid rounded text-xs border border-amber/30 text-amber-light">Educational Innovation</span>
+                  <span class="px-2.5 py-1 bg-navy-mid rounded text-xs border border-amber/30 text-amber-light">Learner Experience Research</span>
+                </div>
+              </div>
+
+              <!-- Professional Skills -->
+              <div>
+                <h5 class="text-xs text-navy-light font-bold uppercase tracking-wider mb-3">Professional Skills</h5>
+                <ul class="space-y-2 text-sm text-cream opacity-90">
+                  <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-amber"></i> Curriculum Design</li>
+                  <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-amber"></i> Educational Content Development</li>
+                  <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-amber"></i> Prompt Design & Evaluation</li>
+                  <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-amber"></i> Online Teaching & Facilitation</li>
+                </ul>
+              </div>
+
+              <!-- Tools & Methods -->
+              <div>
+                <h5 class="text-xs text-navy-light font-bold uppercase tracking-wider mb-3">Tools & Methods</h5>
+                <ul class="space-y-2 text-sm text-cream opacity-90">
+                  <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-amber"></i> Qualitative Research Design</li>
+                  <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-amber"></i> Instructional Design Principles</li>
+                  <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-amber"></i> AI Systems Evaluation</li>
+                  <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-amber"></i> Learning Experience Design</li>
+                </ul>
+              </div>
+
+              <!-- Authoring Tools -->
+              <div>
+                <h5 class="text-xs text-navy-light font-bold uppercase tracking-wider mb-3">Authoring Tools</h5>
+                <ul class="space-y-2 text-sm text-cream opacity-90">
+                  <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-amber mt-0.5"></i> <span>Articulate 360 (used to build adaptive branching logic prototype during M.Sc.)</span></li>
+                  <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-amber mt-0.5"></i> <span>H5P (academic familiarity)</span></li>
+                  <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-amber mt-0.5"></i> <span>xAPI / learning analytics (conceptual, coursework-level)</span></li>
+                </ul>
+              </div>
+
+              <!-- Languages -->
+              <div>
+                <h5 class="text-xs text-navy-light font-bold uppercase tracking-wider mb-3">Languages</h5>
+                <ul class="space-y-2 text-sm text-cream opacity-90">
+                  <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-amber"></i> Turkish: Native</li>
+                  <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-amber"></i> English: Fluent (IELTS 8.0)</li>
+                  <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-amber"></i> French: Working Professional</li>
+                  <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-amber"></i> German: A1, actively learning</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects Section (Grid Layout) -->
+  <section id="projects" class="py-20 bg-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-sm font-bold text-amber tracking-widest uppercase mb-2">Portfolio</h2>
+        <h3 class="text-3xl font-serif font-bold text-navy mb-6">Selected Projects & Research</h3>
+        <p class="text-gray-600">Academic, conceptual, and practice-based projects in educational technology and learning sciences.</p>
+      </div>
+
+      <!-- Project Grid -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        
+        <!-- Project: Interactive Learner Engagement App -->
+        <div class="project-card bg-cream-light rounded-2xl p-6 border border-navy/5 flex flex-col">
+          <a href="https://share.gemini.google/CBOhf8Av6JUT" target="_blank" class="block w-full h-48 bg-gray-100 rounded-xl mb-5 flex items-center justify-center text-gray-300 overflow-hidden relative group/preview hover:bg-gray-200 transition-colors">
+            <!-- To add a screenshot, delete the <i> tag below and uncomment the <img> tag -->
+            <!-- <img src="your-image.jpg" alt="Interactive App Preview" class="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-105"> -->
+            <i class="ph ph-image text-4xl"></i>
+            <div class="absolute top-3 right-3 bg-navy text-white text-xs font-bold px-2.5 py-1.5 rounded flex items-center gap-1 shadow-md opacity-90 group-hover/preview:opacity-100 transition-opacity">
+              View Project <i class="ph ph-arrow-up-right"></i>
+            </div>
+          </a>
+          <h4 class="text-lg font-bold text-navy mb-2">Interactive Learner Engagement App</h4>
+          <p class="text-xs text-amber font-bold mb-3 uppercase tracking-wider">Practice-Based EdTech Project</p>
+          <p class="text-gray-600 mb-5 text-sm leading-relaxed flex-grow">
+            A web-based interactive application designed to engage language learners at different proficiency levels. Features differentiated tasks and activities adapted to learner level, built to increase active participation beyond passive content consumption.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Interactive Design</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Differentiated Learning</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Web App</span>
+          </div>
+        </div>
+
+        <!-- Project: Interview Preparation Builder -->
+        <div class="project-card bg-cream-light rounded-2xl p-6 border border-navy/5 flex flex-col">
+          <a href="https://share.gemini.google/dviY06X5rT9m" target="_blank" class="block w-full h-48 bg-gray-100 rounded-xl mb-5 flex items-center justify-center text-gray-300 overflow-hidden relative group/preview hover:bg-gray-200 transition-colors">
+            <!-- To add a screenshot, delete the <i> tag below and uncomment the <img> tag -->
+            <!-- <img src="your-image.jpg" alt="Interview Prep Preview" class="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-105"> -->
+            <i class="ph ph-image text-4xl"></i>
+            <div class="absolute top-3 right-3 bg-navy text-white text-xs font-bold px-2.5 py-1.5 rounded flex items-center gap-1 shadow-md opacity-90 group-hover/preview:opacity-100 transition-opacity">
+              View Project <i class="ph ph-arrow-up-right"></i>
+            </div>
+          </a>
+          <h4 class="text-lg font-bold text-navy mb-2">Interview Preparation Builder</h4>
+          <p class="text-xs text-purple-600 font-bold mb-3 uppercase tracking-wider">Student-Facing Tutoring Tool — React App</p>
+          <p class="text-gray-600 mb-5 text-sm leading-relaxed flex-grow">
+            A fully interactive interview prep tool built for a tutoring student preparing for an R&D lab position. Features two tracks — HR screening and technical chemistry questions — with reveal-on-click answer templates, a teacher notes toggle, and a structured elevator pitch builder. Built in React with tab navigation and animated card components.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">React</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Interactive Design</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Tutoring Tool</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Interview Prep</span>
+          </div>
+        </div>
+
+        <!-- Project: Collaborative IELTS Essay Viewer -->
+        <div class="project-card bg-cream-light rounded-2xl p-6 border border-navy/5 flex flex-col">
+          <a href="https://share.gemini.google/SNfo9vcycY1c" target="_blank" class="block w-full h-48 bg-gray-100 rounded-xl mb-5 flex items-center justify-center text-gray-300 overflow-hidden relative group/preview hover:bg-gray-200 transition-colors">
+            <!-- Add <img> tag here once screenshot is ready -->
+            <i class="ph ph-image text-4xl"></i>
+            <div class="absolute top-3 right-3 bg-navy text-white text-xs font-bold px-2.5 py-1.5 rounded flex items-center gap-1 shadow-md opacity-90 group-hover/preview:opacity-100 transition-opacity">
+              View Project <i class="ph ph-arrow-up-right"></i>
+            </div>
+          </a>
+          <h4 class="text-lg font-bold text-navy mb-2">Collaborative IELTS Essay Viewer</h4>
+          <p class="text-xs text-rose-600 font-bold mb-3 uppercase tracking-wider">Real-Time Essay Review Tool</p>
+          <p class="text-gray-600 mb-5 text-sm leading-relaxed flex-grow">
+            A deployed web application built for an IELTS preparation student to review and collaborate on essays. Connected to a Firebase database so student work and feedback are saved persistently across sessions. Includes a progress-aware interface — unlike session-only tools, data is retained between visits.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Firebase</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Collaborative Tool</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">IELTS Prep</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Real-Time</span>
+          </div>
+        </div>
+
+        <!-- Project: Language Learning Practice Games -->
+        <div class="project-card bg-cream-light rounded-2xl p-6 border border-navy/5 flex flex-col">
+          <a href="https://share.gemini.google/qasLbPiZf3mk" target="_blank" class="block w-full h-48 bg-gray-100 rounded-xl mb-5 flex items-center justify-center text-gray-300 overflow-hidden relative group/preview hover:bg-gray-200 transition-colors">
+            <!-- To add a screenshot, delete the <i> tag below and uncomment the <img> tag -->
+            <!-- <img src="your-image.jpg" alt="Practice Games Preview" class="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-105"> -->
+            <i class="ph ph-image text-4xl"></i>
+            <div class="absolute top-3 right-3 bg-navy text-white text-xs font-bold px-2.5 py-1.5 rounded flex items-center gap-1 shadow-md opacity-90 group-hover/preview:opacity-100 transition-opacity">
+              View Project <i class="ph ph-arrow-up-right"></i>
+            </div>
+          </a>
+          <h4 class="text-lg font-bold text-navy mb-2">Language Learning Practice Games</h4>
+          <p class="text-xs text-indigo-600 font-bold mb-3 uppercase tracking-wider">Engagement-Focused EdTech Tools</p>
+          <p class="text-gray-600 mb-5 text-sm leading-relaxed flex-grow">
+            A collection of browser-based games designed to help students practice language skills in an engaging format. Built for use with real tutoring students, targeting different skill areas and proficiency levels.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Game-Based Learning</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Interactive Design</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Language Practice</span>
+          </div>
+        </div>
+
+        <!-- Project: Game-Based Learning Design -->
+        <div class="project-card bg-cream-light rounded-2xl p-6 border border-navy/5 flex flex-col">
+          <a href="#" target="_blank" class="block w-full h-48 bg-gray-100 rounded-xl mb-5 flex items-center justify-center text-gray-300 overflow-hidden relative group/preview hover:bg-gray-200 transition-colors">
+            <!-- Add <img> tag here once screenshot is ready -->
+            <i class="ph ph-image text-4xl"></i>
+            <div class="absolute top-3 right-3 bg-white/80 backdrop-blur text-gray-600 text-xs font-bold px-2.5 py-1.5 rounded shadow-sm group-hover/preview:opacity-0 transition-opacity">
+              Screenshots Soon
+            </div>
+            <div class="absolute top-3 right-3 bg-navy text-white text-xs font-bold px-2.5 py-1.5 rounded flex items-center gap-1 shadow-md opacity-0 group-hover/preview:opacity-100 transition-opacity">
+              View Project <i class="ph ph-arrow-up-right"></i>
+            </div>
+          </a>
+          <h4 class="text-lg font-bold text-navy mb-2">Game-Based Learning Design</h4>
+          <p class="text-xs text-indigo-600 font-bold mb-3 uppercase tracking-wider">Interactive Learning Design</p>
+          <p class="text-gray-600 mb-5 text-sm leading-relaxed flex-grow">
+            Conceptualized a role-playing game designed to support English language learning through interactive storytelling. Explored how learner engagement indicators and play analytics could inform adaptive task progression.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Gamification</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Learning Design</span>
+          </div>
+        </div>
+
+        <!-- Project: Interactive CV Builder -->
+        <div class="project-card bg-cream-light rounded-2xl p-6 border border-navy/5 flex flex-col">
+          <a href="https://share.gemini.google/5W2dO5CIla5P" target="_blank" class="block w-full h-48 bg-gray-100 rounded-xl mb-5 flex items-center justify-center text-gray-300 overflow-hidden relative group/preview hover:bg-gray-200 transition-colors">
+            <!-- Add <img> tag here once screenshot is ready -->
+            <i class="ph ph-image text-4xl"></i>
+            <div class="absolute top-3 right-3 bg-navy text-white text-xs font-bold px-2.5 py-1.5 rounded flex items-center gap-1 shadow-md opacity-90 group-hover/preview:opacity-100 transition-opacity">
+              View Project <i class="ph ph-arrow-up-right"></i>
+            </div>
+          </a>
+          <h4 class="text-lg font-bold text-navy mb-2">Interactive CV Builder</h4>
+          <p class="text-xs text-teal-600 font-bold mb-3 uppercase tracking-wider">Personal Productivity Tool</p>
+          <p class="text-gray-600 mb-5 text-sm leading-relaxed flex-grow">
+            A web app with an editable form interface that lets me customize each CV section and export the result as a PDF or Word document. Built to streamline tailoring applications for different roles without manually reformatting each time.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Productivity Tool</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">PDF Export</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">CV Design</span>
+          </div>
+        </div>
+
+        <!-- Project: Job Application Screening Pipeline -->
+        <div class="project-card bg-cream-light rounded-2xl p-6 border border-navy/5 flex flex-col">
+          <a href="#" target="_blank" class="block w-full h-48 bg-gray-100 rounded-xl mb-5 flex items-center justify-center text-gray-300 overflow-hidden relative group/preview hover:bg-gray-200 transition-colors">
+            <!-- Add <img> tag here once screenshot is ready -->
+            <i class="ph ph-image text-4xl"></i>
+            <div class="absolute top-3 right-3 bg-white/80 backdrop-blur text-gray-600 text-xs font-bold px-2.5 py-1.5 rounded shadow-sm group-hover/preview:opacity-0 transition-opacity">
+              Screenshots Soon
+            </div>
+            <div class="absolute top-3 right-3 bg-navy text-white text-xs font-bold px-2.5 py-1.5 rounded flex items-center gap-1 shadow-md opacity-0 group-hover/preview:opacity-100 transition-opacity">
+              View Project <i class="ph ph-arrow-up-right"></i>
+            </div>
+          </a>
+          <h4 class="text-lg font-bold text-navy mb-2">Job Application Screening Pipeline</h4>
+          <p class="text-xs text-navy-light font-bold mb-3 uppercase tracking-wider">Personal Productivity & Automation Project</p>
+          <p class="text-gray-600 mb-5 text-sm leading-relaxed flex-grow">
+            Built an end-to-end job search automation system combining web scrapers, Zapier workflows, and a Telegram notification bot. A custom web app handles job scoring and filtering so only relevant opportunities reach review. Designed to reduce manual search time and prioritize high-fit positions.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Automation</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Workflow Design</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Web Scraping</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Telegram Bot</span>
+          </div>
+        </div>
+
+        <!-- Project: Ultra Smart School -->
+        <div class="project-card bg-cream-light rounded-2xl p-6 border border-navy/5 flex flex-col">
+          <a href="#" target="_blank" class="block w-full h-48 bg-gray-100 rounded-xl mb-5 flex items-center justify-center text-gray-300 overflow-hidden relative group/preview hover:bg-gray-200 transition-colors">
+            <!-- Add <img> tag here once screenshot is ready -->
+            <i class="ph ph-image text-4xl"></i>
+            <div class="absolute top-3 right-3 bg-white/80 backdrop-blur text-gray-600 text-xs font-bold px-2.5 py-1.5 rounded shadow-sm group-hover/preview:opacity-0 transition-opacity">
+              Screenshots Soon
+            </div>
+            <div class="absolute top-3 right-3 bg-navy text-white text-xs font-bold px-2.5 py-1.5 rounded flex items-center gap-1 shadow-md opacity-0 group-hover/preview:opacity-100 transition-opacity">
+              View Project <i class="ph ph-arrow-up-right"></i>
+            </div>
+          </a>
+          <h4 class="text-lg font-bold text-navy mb-2">Ultra Smart School — EdTech Platform</h4>
+          <p class="text-xs text-amber font-bold mb-3 uppercase tracking-wider">EdTech Startup & Curriculum Design</p>
+          <p class="text-gray-600 mb-5 text-sm leading-relaxed flex-grow">
+            Co-founded an adaptive learning platform focused on language acquisition. Led the instructional design process, developed comprehensive educational materials, and mapped out the core curriculum to ensure engaging learner experiences.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Instructional Design</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Curriculum Development</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Content Creation</span>
+          </div>
+        </div>
+
+        <!-- Project: M.A. Thesis -->
+        <div class="project-card bg-cream-light rounded-2xl p-6 border border-navy/5 flex flex-col">
+          <a href="#" target="_blank" class="block w-full h-48 bg-rose-50 rounded-xl mb-5 flex items-center justify-center text-rose-300 overflow-hidden relative group/preview hover:bg-rose-100 transition-colors">
+            <i class="ph ph-books text-5xl"></i>
+            <div class="absolute top-3 right-3 bg-navy text-white text-xs font-bold px-2.5 py-1.5 rounded flex items-center gap-1 shadow-md opacity-90 group-hover/preview:opacity-100 transition-opacity">
+              ResearchGate <i class="ph ph-arrow-up-right"></i>
+            </div>
+          </a>
+          <h4 class="text-lg font-bold text-navy mb-2">Digital Transition in Language Education</h4>
+          <p class="text-xs text-rose-600 font-bold mb-3 uppercase tracking-wider">M.A. Thesis Research</p>
+          <p class="text-gray-600 mb-5 text-sm leading-relaxed flex-grow">
+            Conducted qualitative research using interviews and thematic analysis to investigate the transition from face-to-face to online language teaching. Explored student motivation, teacher adaptation, and the potential role of adaptive learning approaches in digital environments.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Qualitative Research</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Thematic Analysis</span>
+          </div>
+        </div>
+
+        <!-- Project: Cognitive Abilities -->
+        <div class="project-card bg-cream-light rounded-2xl p-6 border border-navy/5 flex flex-col">
+          <a href="#" target="_blank" class="block w-full h-48 bg-emerald-50 rounded-xl mb-5 flex items-center justify-center text-emerald-300 overflow-hidden relative group/preview hover:bg-emerald-100 transition-colors">
+            <i class="ph ph-brain text-5xl"></i>
+            <div class="absolute top-3 right-3 bg-navy text-white text-xs font-bold px-2.5 py-1.5 rounded flex items-center gap-1 shadow-md opacity-90 group-hover/preview:opacity-100 transition-opacity">
+              ResearchGate <i class="ph ph-arrow-up-right"></i>
+            </div>
+          </a>
+          <h4 class="text-lg font-bold text-navy mb-2">Cognitive Abilities & Learning Strategies</h4>
+          <p class="text-xs text-emerald-600 font-bold mb-3 uppercase tracking-wider">Unpublished Collaborative Research</p>
+          <p class="text-gray-600 mb-5 text-sm leading-relaxed flex-grow">
+            Collaborated with a university professor to explore the relationship between cognitive differences and foreign language learning strategies, focusing on how individual variations in comprehension and processing styles influence pedagogical approaches.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Cognitive Science</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Learning Strategies</span>
+          </div>
+        </div>
+
+        <!-- Project: Adaptive Learning -->
+        <div class="project-card bg-cream-light rounded-2xl p-6 border border-navy/5 flex flex-col">
+          <div class="h-12 w-12 bg-amber/20 text-amber rounded-xl flex items-center justify-center mb-5">
+            <i class="ph ph-users-three text-2xl"></i>
+          </div>
+          <h4 class="text-lg font-bold text-navy mb-2">Adaptive Learning Framework</h4>
+          <p class="text-xs text-amber font-bold mb-3 uppercase tracking-wider">M.Sc. EdTech Research Project</p>
+          <p class="text-gray-600 mb-5 text-sm leading-relaxed flex-grow">
+            Designed a conceptual framework for adaptive group learning and project evaluation, exploring how learner characteristics and group composition can be incorporated into technology-supported assessment systems.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Adaptive Learning</span>
+            <span class="text-xs font-semibold px-2 py-1 bg-white border border-gray-200 rounded text-gray-600">Educational Technology</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="py-20 bg-cream border-t border-navy/5">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <i class="ph ph-paper-plane-tilt text-5xl text-amber mb-6 inline-block"></i>
+      <h2 class="text-4xl font-serif font-bold text-navy mb-6">Let's Connect</h2>
+      <p class="text-gray-600 mb-10 text-lg">
+        I am interested in collaborating on projects involving educational technology, learning sciences, instructional design, AI-supported learning, digital education research, and learner-centered innovation. <br/><br/>
+        Currently based in <strong>Essen, Germany</strong> and authorized to work through the Opportunity Card (Chancenkarte).
+      </p>
+      
+      <div class="flex flex-col sm:flex-row justify-center items-center gap-6">
+        <a href="mailto:savascan.t@outlook.com" class="bg-navy hover:bg-navy-light text-white px-8 py-4 rounded-full font-medium transition-all shadow-lg flex items-center gap-2 w-full sm:w-auto justify-center">
+          <i class="ph ph-envelope-simple text-xl"></i> savascan.t@outlook.com
+        </a>
+        <a href="https://linkedin.com/in/savascan-t" target="_blank" class="bg-white text-navy border border-gray-200 hover:border-navy hover:bg-gray-50 px-8 py-4 rounded-full font-medium transition-all shadow-sm flex items-center gap-2 w-full sm:w-auto justify-center">
+          <i class="ph ph-linkedin-logo text-xl"></i> Connect on LinkedIn
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-navy text-center py-8 border-t border-navy-light/20">
+    <div class="max-w-6xl mx-auto px-4">
+      <p class="text-cream/60 text-sm">
+        <span data-en="Designed with pedagogical insight · " data-de="Mit pädagogischem Verständnis gestaltet · ">Designed with pedagogical insight · </span> 
+        Savaşcan Türken &copy; 2026
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>
