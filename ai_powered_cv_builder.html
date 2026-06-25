@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Forcing desktop width on mobile viewports -->
+    <meta name="viewport" content="width=1280">
+    <title>AI-Powered CV Builder - Savaşcan Türken</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Phosphor Icons for modern UI elements -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- SortableJS for Drag and Drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    
+    <!-- html2pdf for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            overflow: hidden; /* Handled by internal scroll areas */
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* A4 Canvas Styling */
+        .a4-page {
+            width: 100%;
+            max-width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background: white;
+            padding: 20mm;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            font-family: 'Merriweather', serif; /* Classic CV look for the doc itself */
+            color: #1e293b;
+            transition: all 0.3s ease;
+        }
+        
+        .ai-processing .a4-page {
+            opacity: 0.7;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+            pointer-events: none;
+        }
+
+        /* Action Buttons (Desktop behavior forced globally) */
+        .action-btns {
+            position: absolute;
+            right: auto;
+            left: -90px;
+            top: 0;
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: all 0.2s ease-in-out;
+            background: #ffffff;
+            padding: 4px 6px;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            border: 1px solid #e2e8f0;
+            z-index: 10;
+        }
+        
+        .sortable-item:hover > .action-btns {
+            opacity: 1;
+            transform: translateX(5px);
+        }
+
+        .action-btn {
+            cursor: pointer;
+            font-size: 18px;
+            user-select: none;
+            padding: 4px;
+            border-radius: 4px;
+            color: #64748b;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn:hover { background: #f1f5f9; color: #0f172a; }
+        .action-btn.drag-handle { cursor: grab; }
+        .action-btn.delete:hover { background: #fee2e2; color: #ef4444; }
+
+        .sortable-item { position: relative; }
+
+        [contenteditable="true"] {
+            transition: all 0.2s;
+            border-radius: 4px;
+            border: 1px solid transparent;
+        }
+        
+        [contenteditable="true"]:hover {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+            cursor: text;
+        }
+        
+        [contenteditable="true"]:focus {
+            background-color: #ffffff;
+            border-color: #6366f1;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        /* AI Update Flash Animation */
+        @keyframes aiWordFlash {
+            0% { background-color: #4ade80; color: #064e3b; box-shadow: 0 0 8px rgba(74, 222, 128, 0.8); }
+            100% { background-color: #bbf7d0; color: #166534; box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.3); }
+        }
+
+        /* Inline specific sentence/word highlights */
+        .ai-diff {
+            background-color: transparent;
+            color: inherit;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .show-ai-highlights .ai-diff {
+            background-color: #bbf7d0;
+            color: #166534;
+            padding: 0 2px;
+            box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.3);
+        }
+        
+        .show-ai-highlights .ai-diff.just-updated {
+            animation: aiWordFlash 1.5s ease-out;
+        }
+
+        /* Print Styles */
+        @media print {
+            body, .h-screen { height: auto !important; overflow: visible !important; background: white; }
+            #sidebar, .no-print { display: none !important; }
+            #main-stage { padding: 0 !important; overflow: visible !important; display: block;}
+            .a4-page { box-shadow: none; margin: 0; padding: 0; width: 100%; min-height: auto; max-width: none; }
+            .sortable-item { margin-top: 0 !important; padding-top: 0 !important; }
+            .cv-header-line { margin-top: 1.5rem !important; }
+        }
+
+        .cv-header-line {
+            border-bottom: 1.5px solid #334155;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.25rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Custom Toast Notification */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            background: #1e293b;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.error { background: #ef4444; }
+        .toast.success { background: #10b981; }
+    </style>
+</head>
+<body class="bg-slate-200 text-sm overflow-hidden w-full h-screen relative">
+
+    <!-- Floating Menu Toggle Button -->
+    <button onclick="toggleMenu()" class="fixed top-6 left-6 z-30 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-full shadow-xl transition-all hover:scale-105 flex items-center gap-2 no-print group">
+        <i class="ph-bold ph-list text-xl transition-transform group-hover:rotate-90"></i>
+        <span class="font-semibold tracking-wide">AI Tools</span>
+    </button>
+
+    <!-- Backdrop -->
+    <div id="menu-backdrop" onclick="toggleMenu()" class="fixed inset-0 bg-slate-900/40 z-40 hidden opacity-0 transition-opacity duration-300 no-print cursor-pointer"></div>
+
+    <!-- Sidebar / Controls Area (Drawer) -->
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-80 bg-white border-r border-gray-200 flex flex-col z-50 shadow-2xl transition-transform duration-300 transform -translate-x-full shrink-0 no-print">
+        <button onclick="toggleMenu()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-700 transition-colors p-1.5 bg-gray-100 hover:bg-gray-200 rounded-md">
+            <i class="ph-bold ph-x text-lg"></i>
+        </button>
+        <div class="p-6 border-b border-gray-200 bg-gray-50 flex-shrink-0 pr-12">
+            <h1 class="text-xl font-bold text-indigo-600 flex items-center gap-2">
+                <i class="ph-fill ph-magic-wand"></i> AI Portfolio CV
+            </h1>
+            <p class="text-xs text-gray-500 mt-2 leading-relaxed block">
+                Welcome to my interactive CV. Paste a job description below, and watch the AI tailor my experience specifically for that role in real-time.
+            </p>
+        </div>
+
+        <div class="p-6 flex-1 overflow-y-auto flex flex-col gap-5">
+            
+            <div class="flex flex-col gap-2">
+                <label for="job-ad" class="font-semibold text-gray-700 text-sm flex justify-between items-center">
+                    Target Job Description
+                    <span class="text-xs font-normal text-gray-400">Required</span>
+                </label>
+                <textarea id="job-ad" rows="8" placeholder="Paste the job requirements or description here..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none text-sm transition-all"></textarea>
+            </div>
+
+            <button id="tailor-btn" onclick="tailorCV()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-all flex justify-center items-center gap-2 relative overflow-hidden group">
+                <i class="ph-bold ph-sparkle transition-transform group-hover:scale-110"></i>
+                <span id="tailor-btn-text">Tailor CV with AI</span>
+                
+                <!-- Loading Spinner (Hidden by default) -->
+                <svg id="tailor-btn-spinner" class="animate-spin h-5 w-5 text-white hidden absolute" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
+
+            <!-- Toggle Highlight Section -->
+            <div class="mt-2 flex items-center justify-between bg-white border border-gray-200 p-3 rounded-lg shadow-sm">
+                <div class="flex items-center gap-2">
+                    <i class="ph-fill ph-highlighter text-green-500 text-lg"></i>
+                    <span class="text-sm font-semibold text-gray-700">Highlight AI Changes</span>
+                </div>
+                <button id="toggle-highlights-btn" onclick="toggleHighlights()" type="button" class="bg-gray-200 relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2" role="switch" aria-checked="false">
+                  <span class="sr-only">Toggle AI highlights</span>
+                  <span aria-hidden="true" id="toggle-knob" class="translate-x-0 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                </button>
+            </div>
+
+            <div class="mt-auto pt-6 border-t border-gray-200 flex-shrink-0">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Export Options</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="downloadPDF()" class="bg-white border border-gray-300 hover:border-red-400 hover:text-red-600 text-gray-700 py-2 px-3 rounded-md shadow-sm transition-colors flex items-center justify-center gap-2 font-medium text-sm">
+                        <i class="ph-fill ph-file-pdf text-lg text-red-500"></i> PDF
+                    </button>
+                    <button onclick="downloadWord()" class="bg-white border border-gray-300 hover:border-blue-400 hover:text-blue-600 text-gray-700 py-2 px-3 rounded-md shadow-sm transition-colors flex items-center justify-center gap-2 font-medium text-sm">
+                        <i class="ph-fill ph-file-doc text-lg text-blue-500"></i> Word
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg flex items-start gap-3 mt-2 flex-shrink-0">
+                <i class="ph-fill ph-info text-blue-500 mt-0.5"></i>
+                <p class="text-xs text-blue-800 leading-relaxed">
+                    <strong>Interactive Preview:</strong> Hover over the document sections on the right to drag, drop, duplicate, or delete them. Click any text to manually edit it.
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Stage / CV Canvas -->
+    <main id="main-stage" class="w-full h-full overflow-y-auto p-8 relative">
+        
+        <div id="cv-container" class="a4-page relative leading-relaxed text-[10pt] mt-0">
+            
+            <!-- Header Section (Not targeted by AI to preserve core identity) -->
+            <div class="text-center mb-8 pb-4 border-b border-gray-200">
+                <h1 class="text-4xl font-bold mb-2 font-sans tracking-tight text-slate-900" contenteditable="true">Savaşcan Türken</h1>
+                <p contenteditable="true" class="text-slate-600 font-sans text-[9pt] flex justify-center gap-2 items-center flex-wrap">
+                    <a href="#" class="text-indigo-600 hover:underline">LinkedIn</a> | 
+                    <span>savascan.t@outlook.com</span> | 
+                    <span>Phone: +491637886295</span> | 
+                    <span>Essen/Germany</span>
+                </p>
+                <p class="mt-2 text-sm text-slate-800 font-sans bg-slate-50 inline-block px-3 py-1 rounded-full border border-slate-200" contenteditable="true">
+                    <strong>Work authorization:</strong> Authorized to work via Opportunity Card (Chancenkarte), able to relocate easily.
+                </p>
+            </div>
+
+            <div id="main-content">
+                
+                <!-- Short Profile -->
+                <div class="sortable-item mb-5">
+                    <div class="action-btns no-print">
+                        <span class="action-btn drag-handle" title="Drag to reorder"><i class="ph ph-dots-six-vertical"></i></span>
+                        <span class="action-btn" onclick="duplicateBlock(this)" title="Duplicate section"><i class="ph ph-copy"></i></span>
+                        <span class="action-btn delete" onclick="removeBlock(this)" title="Delete section"><i class="ph ph-trash"></i></span>
+                    </div>
+                    <div class="cv-header-line" contenteditable="true">Short Profile</div>
+                    <!-- Added ai-editable class so the LLM targets this paragraph -->
+                    <p class="text-justify ai-editable" contenteditable="true">
+                        An EdTech professional and language educator with over a decade of experience across digital learning, international education, and creative problem solving. Brings a mix of pedagogical insight, digital fluency, adaptability, and collaborative thinking to interdisciplinary projects. Particularly enjoys connecting ideas and people across different fields, and fostering communication and collaboration between them, especially in environments where innovation is practical, people-centered, and grounded in real-world impact. Most motivated by work that improves learning experiences, creates visible value for others, and contributes to projects with real social relevance.
+                    </p>
+                </div>
+
+                <!-- Volunteering -->
+                <div class="sortable-item mb-5">
+                    <div class="action-btns no-print">
+                        <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                        <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                        <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                    </div>
+                    <div class="cv-header-line" contenteditable="true">Volunteering</div>
+                    <div class="nested-sortable">
+                        <div class="sortable-item flex mb-2">
+                            <div class="action-btns no-print">
+                                <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                                <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                                <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                            </div>
+                            <div class="w-1/4 font-bold pr-4 font-sans text-[9pt]" contenteditable="true">04/2026 – present</div>
+                            <div class="w-3/4">
+                                <p class="font-bold mb-1 text-[10.5pt]" contenteditable="true">Language Guide, AKAFÖ Language Café at Ruhr University Bochum, Germany</p>
+                                <p class="ai-editable" contenteditable="true">Supporting language exchange between international and local participants by pairing speakers across language backgrounds and guiding structured conversation activities in English.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Work Experience -->
+                <div class="sortable-item mb-5">
+                    <div class="action-btns no-print">
+                        <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                        <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                        <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                    </div>
+                    <div class="cv-header-line" contenteditable="true">Work Experience</div>
+                    <div class="nested-sortable">
+                        
+                        <!-- Experience Item -->
+                        <div class="sortable-item flex mb-4">
+                            <div class="action-btns no-print">
+                                <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                                <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                                <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                            </div>
+                            <div class="w-1/4 font-bold pr-4 font-sans text-[9pt]" contenteditable="true">04/2022 – 01/2026</div>
+                            <div class="w-3/4">
+                                <p class="font-bold mb-1 text-[10.5pt]" contenteditable="true">Linguist | Lionbridge – Remote / Project based</p>
+                                <ul class="list-disc pl-5 ai-editable space-y-1" contenteditable="true">
+                                    <li>Processed and transcribed high-volume international e-sports content under strict 2-hour turnaround deadlines, demonstrating extreme attention to detail and resilience in fast-paced environments.</li>
+                                    <li>Evaluated linguistic outputs for AI models (e.g., MS Copilot), ensuring the accuracy and cultural relevance of localized data for international use.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Experience Item -->
+                        <div class="sortable-item flex mb-4">
+                            <div class="action-btns no-print">
+                                <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                                <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                                <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                            </div>
+                            <div class="w-1/4 font-bold pr-4 font-sans text-[9pt]" contenteditable="true">10/2018 – 01/2026</div>
+                            <div class="w-3/4">
+                                <p class="font-bold mb-1 text-[10.5pt]" contenteditable="true">Freelance English Tutor | Private Tutoring – Online</p>
+                                <ul class="list-disc pl-5 ai-editable space-y-1" contenteditable="true">
+                                    <li>Delivering private English lessons for students and professionals; designing personalized study programs focused on communication, exam preparation and workplace English.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Experience Item -->
+                        <div class="sortable-item flex mb-4">
+                            <div class="action-btns no-print">
+                                <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                                <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                                <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                            </div>
+                            <div class="w-1/4 font-bold pr-4 font-sans text-[9pt]" contenteditable="true">10/2023 – 01/2026</div>
+                            <div class="w-3/4">
+                                <p class="font-bold mb-1 text-[10.5pt]" contenteditable="true">EdTech Advisor | Ultra Smart School – Remote / Project based</p>
+                                <ul class="list-disc pl-5 ai-editable space-y-1" contenteditable="true">
+                                    <li>Co-founded and developed an online educational platform, conceptualizing comprehensive language curricula (A1 to B1) to resolve market gaps in accessible digital education.</li>
+                                    <li>Designed and integrated AI-driven teaching solutions and asynchronous learning models, ensuring pedagogical materials were adaptable to diverse student needs.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Experience Item -->
+                        <div class="sortable-item flex mb-4">
+                            <div class="action-btns no-print">
+                                <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                                <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                                <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                            </div>
+                            <div class="w-1/4 font-bold pr-4 font-sans text-[9pt]" contenteditable="true">08/2021 – 08/2022</div>
+                            <div class="w-3/4">
+                                <p class="font-bold mb-1 text-[10.5pt]" contenteditable="true">English Teacher | Skyeng International Language Schools – Remote</p>
+                                <ul class="list-disc pl-5 ai-editable space-y-1" contenteditable="true">
+                                    <li>Facilitated one-on-one interactive online instruction for a diverse international learner base, increasing engagement through targeted communicative approaches.</li>
+                                    <li>Authored detailed, constructive feedback reports to maximize learner potential and track milestone progress.</li>
+                                    <li>Updated and quality-assured course specifications and content documentation, ensuring strict adherence to accessibility and copyright standards.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Experience Item -->
+                        <div class="sortable-item flex mb-4">
+                            <div class="action-btns no-print">
+                                <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                                <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                                <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                            </div>
+                            <div class="w-1/4 font-bold pr-4 font-sans text-[9pt]" contenteditable="true">02/2019 – 02/2022</div>
+                            <div class="w-3/4">
+                                <p class="font-bold mb-1 text-[10.5pt]" contenteditable="true">English/French Teacher | British English Language Schools – Istanbul, Türkiye</p>
+                                <ul class="list-disc pl-5 ai-editable space-y-1" contenteditable="true">
+                                    <li>Designed and delivered adaptive learning curricula for diverse adult cohorts in classrooms of up to 20 students, effectively tailoring instruction to varying proficiency levels and backgrounds.</li>
+                                    <li>Led the organizational transition to digital learning during the pandemic by deploying the Moodle LMS, designing e-learning content, and training colleagues on the new platform.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Experience Item -->
+                        <div class="sortable-item flex mb-4">
+                            <div class="action-btns no-print">
+                                <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                                <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                                <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                            </div>
+                            <div class="w-1/4 font-bold pr-4 font-sans text-[9pt]" contenteditable="true">01/2016 – 01/2022</div>
+                            <div class="w-3/4">
+                                <p class="font-bold mb-1 text-[10.5pt]" contenteditable="true">Freelance Translator | WordsOnline – Remote</p>
+                                <ul class="list-disc pl-5 ai-editable space-y-1" contenteditable="true">
+                                    <li>Translated, reviewed, and localized technical IT and educational content (EN-TR, FR-TR), ensuring alignment with stringent quality assurance standards.</li>
+                                    <li>Contributed to machine learning translation projects by analyzing and refining AI-generated outputs for major IT enterprise support networks.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Experience Item -->
+                        <div class="sortable-item flex mb-4">
+                            <div class="action-btns no-print">
+                                <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                                <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                                <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                            </div>
+                            <div class="w-1/4 font-bold pr-4 font-sans text-[9pt]" contenteditable="true">09/2018 – 06/2019</div>
+                            <div class="w-3/4">
+                                <p class="font-bold mb-1 text-[10.5pt]" contenteditable="true">French Teacher (Supervised Teaching Internship) – Çamlıca Anadolu Kız Lisesi (High School), Istanbul, Türkiye</p>
+                                <ul class="list-disc pl-5 ai-editable space-y-1" contenteditable="true">
+                                    <li>Completed a year-long supervised teaching practicum in secondary French education, including structured classroom observation, lesson planning, and delivery of evaluated French language instruction.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Experience Item -->
+                        <div class="sortable-item flex mb-4">
+                            <div class="action-btns no-print">
+                                <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                                <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                                <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                            </div>
+                            <div class="w-1/4 font-bold pr-4 font-sans text-[9pt]" contenteditable="true">09/2018 – 06/2019</div>
+                            <div class="w-3/4">
+                                <p class="font-bold mb-1 text-[10.5pt]" contenteditable="true">Sales Representative | Setur Duty Free – Sabiha Gokcen Airport, Istanbul, Türkiye</p>
+                                <ul class="list-disc pl-5 ai-editable space-y-1" contenteditable="true">
+                                    <li>Provided high-level, cross-cultural customer service in a high-traffic international transit hub, quickly building rapport with diverse global clientele.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Education -->
+                <div class="sortable-item mb-5">
+                    <div class="action-btns no-print">
+                        <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                        <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                        <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                    </div>
+                    <div class="cv-header-line" contenteditable="true">Education</div>
+                    <div class="nested-sortable">
+                        
+                        <div class="sortable-item flex mb-4">
+                            <div class="action-btns no-print">
+                                <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                                <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                                <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                            </div>
+                            <div class="w-1/4 font-bold pr-4 font-sans text-[9pt]" contenteditable="true">09/2020 – 06/2023</div>
+                            <div class="w-3/4 ai-editable" contenteditable="true">
+                                <strong>M.A. French Language Teaching at Marmara University at Educational Sciences Institute, Istanbul, Türkiye</strong><br>
+                                GPA: 82.4/100<br>
+                                Focus on language teaching methodology, assessment, curriculum development, and academic research skills.<br>
+                                Thesis: Teaching Foreign Languages: Challenges of the Transition from Classroom-Based Learning to Online Teaching.
+                            </div>
+                        </div>
+
+                        <div class="sortable-item flex mb-4">
+                            <div class="action-btns no-print">
+                                <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                                <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                                <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                            </div>
+                            <div class="w-1/4 font-bold pr-4 font-sans text-[9pt]" contenteditable="true">09/2020 – 06/2022</div>
+                            <div class="w-3/4 ai-editable" contenteditable="true">
+                                <strong>M.Sc. Smart-EdTech, Co-Creativity and Digital Tools for Educational Innovation at Université Côte d'Azur, Nice, France</strong><br>
+                                GPA: 89/100 with honors<br>
+                                Specialization in: Learning Sciences & Technology-Enhanced Learning<br>
+                                Focus on research methods, learning analytics, instructional design, educational computing, and cognitive neuroscience in education, supported by interdisciplinary projects and internship experience.
+                            </div>
+                        </div>
+
+                        <div class="sortable-item flex mb-4">
+                            <div class="action-btns no-print">
+                                <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                                <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                                <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                            </div>
+                            <div class="w-1/4 font-bold pr-4 font-sans text-[9pt]" contenteditable="true">09/2014 – 06/2019</div>
+                            <div class="w-3/4 ai-editable" contenteditable="true">
+                                <strong>B.A. French Language Teaching at Marmara University, Istanbul, Türkiye</strong><br>
+                                GPA: 81/100<br>
+                                Completed an internship at a public high school.<br>
+                                Included a 1-year intensive French preparatory program and a supervised teaching internship at Çamlıca Anadolu Kız Lisesi.
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Languages & Skills Grid -->
+                <div class="grid grid-cols-2 gap-8 mb-5">
+                    <div class="sortable-item">
+                        <div class="action-btns no-print">
+                            <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                            <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                            <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                        </div>
+                        <div class="cv-header-line" contenteditable="true">Languages</div>
+                        <ul class="list-none space-y-1 nested-sortable">
+                            <li class="sortable-item ai-editable" contenteditable="true">Turkish - Native</li>
+                            <li class="sortable-item ai-editable" contenteditable="true">English - Fluent (C1-C2)</li>
+                            <li class="sortable-item ai-editable" contenteditable="true">French - (A2-B1)</li>
+                            <li class="sortable-item ai-editable" contenteditable="true">German - Beginner (Currently Learning).</li>
+                        </ul>
+                    </div>
+
+                    <div class="sortable-item">
+                        <div class="action-btns no-print">
+                            <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                            <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                            <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                        </div>
+                        <div class="cv-header-line" contenteditable="true">Skills</div>
+                        <div class="nested-sortable space-y-2">
+                            <div class="sortable-item ai-editable" contenteditable="true">
+                                <strong>Research:</strong> Qualitative study: semi-structured interviews, audio transcription, inductive-deductive qualitative content analysis, thematic grouping, cross-participant comparison; reporting with tables/figures.
+                            </div>
+                            <div class="sortable-item ai-editable" contenteditable="true">
+                                <strong>Software:</strong> MS Office, Zotero / Mendeley, AI tools (ChatGPT, Gemini, Claude, Twee, MS Copilot), Articulate 360, Moodle LMS.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certificates -->
+                <div class="sortable-item mb-5">
+                    <div class="action-btns no-print">
+                        <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                        <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                        <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                    </div>
+                    <div class="cv-header-line" contenteditable="true">Certificates & Training</div>
+                    <ul class="list-none space-y-1 nested-sortable">
+                        <li class="sortable-item ai-editable" contenteditable="true">Google - Generative AI for Educators (2024)</li>
+                        <li class="sortable-item ai-editable" contenteditable="true">Elsevier - Researcher Academy Certifications</li>
+                        <li class="sortable-item ai-editable" contenteditable="true">INTESOL Worldwide - 120-hour TEFL with TEYL (Accredited by ALAP, Certificate No: 00007658)</li>
+                        <li class="sortable-item ai-editable" contenteditable="true">IELTS Academic 8.0</li>
+                    </ul>
+                </div>
+
+                <div class="sortable-item mb-5">
+                    <div class="action-btns no-print">
+                        <span class="action-btn drag-handle"><i class="ph ph-dots-six-vertical"></i></span>
+                        <span class="action-btn" onclick="duplicateBlock(this)"><i class="ph ph-copy"></i></span>
+                        <span class="action-btn delete" onclick="removeBlock(this)"><i class="ph ph-trash"></i></span>
+                    </div>
+                    <div class="cv-header-line" contenteditable="true">References</div>
+                    <p contenteditable="true">Available upon request at shortlisting stage.</p>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <script>
+        // 1. Initialize SortableJS
+        document.addEventListener('DOMContentLoaded', function() {
+            // Main containers
+            Sortable.create(document.getElementById('main-content'), {
+                handle: '.drag-handle',
+                animation: 150,
+                ghostClass: 'opacity-50'
+            });
+
+            // Nested bullet points and sub-sections
+            document.querySelectorAll('.nested-sortable').forEach(function(el) {
+                Sortable.create(el, {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    fallbackOnBody: true,
+                    swapThreshold: 0.65,
+                    ghostClass: 'opacity-50'
+                });
+            });
+        });
+
+        // 2. Block Management UI
+        function duplicateBlock(btn) {
+            const block = btn.closest('.sortable-item');
+            const clone = block.cloneNode(true);
+            block.parentNode.insertBefore(clone, block.nextSibling);
+            showToast("Section duplicated", "success");
+        }
+
+        function removeBlock(btn) {
+            const block = btn.closest('.sortable-item');
+            block.style.opacity = '0';
+            setTimeout(() => {
+                block.remove();
+                showToast("Section removed", "success");
+            }, 200);
+        }
+
+        // 3. Export Functions
+        function downloadPDF() {
+            const element = document.getElementById('cv-container');
+            const opt = {
+                margin:       [0, 0, 0, 0],
+                filename:     'Savascan_Turken_CV.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Hide action buttons for clean print
+            document.querySelectorAll('.action-btns').forEach(el => el.style.display = 'none');
+            
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Restore buttons
+                document.querySelectorAll('.action-btns').forEach(el => el.style.display = '');
+                showToast("PDF Downloaded successfully", "success");
+            });
+        }
+
+        function downloadWord() {
+            const clone = document.getElementById('cv-container').cloneNode(true);
+            clone.querySelectorAll('.action-btns').forEach(el => el.remove());
+            clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+            
+            // Remove highlight marks for clean export
+            clone.querySelectorAll('.ai-diff').forEach(mark => {
+                const textNode = document.createTextNode(mark.textContent);
+                mark.parentNode.replaceChild(textNode, mark);
+            });
+            
+            // Basic inline styling for MS Word compatibility
+            const htmlString = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head>
+                    <meta charset='utf-8'>
+                    <title>CV</title>
+                    <style>
+                        body { font-family: 'Times New Roman', serif; font-size: 10pt; color: black; }
+                        h1 { font-size: 24pt; margin-bottom: 5px; text-align: center; }
+                        .text-center { text-align: center; }
+                        .cv-header-line { border-bottom: 2px solid black; font-size: 14pt; font-weight: bold; margin-top: 15px; margin-bottom: 10px; text-transform: uppercase; }
+                        .flex { display: table; width: 100%; margin-bottom: 10px; }
+                        .w-1\\/4 { display: table-cell; width: 20%; padding-right: 10px; font-weight: bold; vertical-align: top;}
+                        .w-3\\/4 { display: table-cell; width: 80%; vertical-align: top;}
+                        ul { margin-top: 0; margin-bottom: 0; padding-left: 20px;}
+                        p { margin-top: 0; margin-bottom: 5px; }
+                        em { font-style: italic; }
+                    </style>
+                </head>
+                <body>
+                    ${clone.innerHTML}
+                </body>
+                </html>
+            `;
+            
+            const blob = new Blob(['\ufeff', htmlString], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'Savascan_Turken_CV.doc';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Word Document downloaded", "success");
+        }
+
+        // 4. Custom Toast UI (Replacing alert)
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'error' ? 'ph-warning-circle' : 'ph-check-circle';
+            toast.innerHTML = `<i class="ph-fill ${icon} text-lg"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // 4.2 Toggle Side Menu
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('menu-backdrop');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                // Open menu
+                sidebar.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+                // Small delay to allow display:block to apply before animating opacity
+                setTimeout(() => backdrop.classList.remove('opacity-0'), 10);
+            } else {
+                // Close menu
+                sidebar.classList.add('-translate-x-full');
+                backdrop.classList.add('opacity-0');
+                setTimeout(() => backdrop.classList.add('hidden'), 300); // match transition duration
+            }
+        }
+
+        // 4.5 Toggle Highlight Feature
+        let highlightsOn = false;
+        function toggleHighlights() {
+            highlightsOn = !highlightsOn;
+            const btn = document.getElementById('toggle-highlights-btn');
+            const knob = document.getElementById('toggle-knob');
+            
+            if (highlightsOn) {
+                document.body.classList.add('show-ai-highlights');
+                btn.classList.remove('bg-gray-200');
+                btn.classList.add('bg-green-500');
+                knob.classList.remove('translate-x-0');
+                knob.classList.add('translate-x-5');
+            } else {
+                document.body.classList.remove('show-ai-highlights');
+                btn.classList.remove('bg-green-500');
+                btn.classList.add('bg-gray-200');
+                knob.classList.remove('translate-x-5');
+                knob.classList.add('translate-x-0');
+            }
+        }
+
+        // 5. Generative AI Integration (Gemini API)
+        async function tailorCV() {
+            const jobAd = document.getElementById('job-ad').value.trim();
+            if (!jobAd) {
+                showToast("Please paste a job description first.", "error");
+                return;
+            }
+
+            // Set UI to loading state
+            const btn = document.getElementById('tailor-btn');
+            const btnText = document.getElementById('tailor-btn-text');
+            const spinner = document.getElementById('tailor-btn-spinner');
+            const icon = btn.querySelector('.ph-sparkle');
+            
+            btn.disabled = true;
+            btnText.innerText = "Analyzing & Tailoring...";
+            spinner.classList.remove('hidden');
+            icon.classList.add('hidden');
+            document.body.classList.add('ai-processing');
+
+            try {
+                // 5a. Extract data to send to AI
+                // We only target elements with 'ai-editable' to avoid AI changing hard facts like dates or section titles.
+                const editables = document.querySelectorAll('.ai-editable');
+                const dataPayload = [];
+                
+                editables.forEach((el, index) => {
+                    // Assign a temporary unique ID for mapping the response back
+                    const nodeId = `ai-node-${index}`;
+                    el.dataset.aiId = nodeId; 
+                    dataPayload.push({
+                        id: nodeId,
+                        text: el.innerHTML.trim() // Use innerHTML to preserve <strong> tags
+                    });
+                });
+
+                // 5b. Prepare the Gemini API call
+                const apiKey = ""; // Left empty deliberately for Canvas environment to auto-inject
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const systemInstruction = `
+                You are an expert career coach and professional CV writer.
+                You will be provided with a JSON array containing sections of a candidate's CV (identified by 'id' and 'text'), and a target Job Description.
+                Your task is to tailor the 'text' fields to highlight the most relevant skills, experiences, and keywords for the target job.
+                
+                CRITICAL RULES FOR HIGHLIGHTING (MUST FOLLOW):
+                1. You must compare your new tailored text to the original text.
+                2. Any NEW words, CHANGED words, or REWRITTEN phrases MUST be wrapped in <mark class="ai-diff"> and </mark>.
+                3. DO NOT wrap the entire paragraph. ONLY wrap the specific parts that are different or added.
+                4. You MUST preserve all original HTML tags (like <strong>) exactly as they are. Do not put <mark> tags inside or around <strong> tags unless the bold text itself changed.
+                
+                EXAMPLE:
+                Original: "Processed and transcribed high-volume international e-sports content."
+                Tailored: "Processed and transcribed high-volume <mark class="ai-diff">digital media and</mark> international e-sports content <mark class="ai-diff">to ensure quality assurance</mark>."
+                `;
+
+                const prompt = `
+                Target Job Description:
+                ---
+                ${jobAd}
+                ---
+                Candidate CV Sections (JSON):
+                ${JSON.stringify(dataPayload)}
+                `;
+
+                const requestBody = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    systemInstruction: { parts: [{ text: systemInstruction }] },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    id: { type: "STRING" },
+                                    text: { type: "STRING" }
+                                },
+                                required: ["id", "text"]
+                            }
+                        }
+                    }
+                };
+
+                // 5c. Execute API Call
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) throw new Error("API Request Failed");
+
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts) {
+                    const jsonString = result.candidates[0].content.parts[0].text;
+                    const updatedData = JSON.parse(jsonString);
+
+                    // 5d. Apply updates back to the DOM
+                    updatedData.forEach(item => {
+                        const targetElement = document.querySelector(`[data-ai-id="${item.id}"]`);
+                        if (targetElement) {
+                            
+                            const oldHtml = targetElement.innerHTML.trim();
+                            const newHtml = item.text.trim();
+
+                            if (oldHtml !== newHtml) {
+                                targetElement.innerHTML = newHtml; // Inject new HTML with marks
+                                
+                                // Flash animation on the specific words changed
+                                const marks = targetElement.querySelectorAll('.ai-diff');
+                                marks.forEach(mark => {
+                                    mark.classList.add('just-updated');
+                                });
+                            }
+                        }
+                    });
+                    
+                    showToast("CV successfully tailored!", "success");
+
+                    // Automatically turn on highlights so the user sees the changes
+                    if (!highlightsOn) {
+                        toggleHighlights();
+                    }
+
+                } else {
+                    throw new Error("Invalid response structure from AI");
+                }
+
+            } catch (error) {
+                console.error("AI Tailoring Error:", error);
+                showToast("Failed to generate CV. Please try again.", "error");
+            } finally {
+                // Restore UI State
+                btn.disabled = false;
+                btnText.innerText = "Tailor CV with AI";
+                spinner.classList.add('hidden');
+                icon.classList.remove('hidden');
+                document.body.classList.remove('ai-processing');
+            }
+        }
+    </script>
+</body>
+</html>

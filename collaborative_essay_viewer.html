@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaborative Essay Viewer</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* Custom Scrollbar for text areas */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* Styling for the Essay Content */
+        #page-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 1.25rem;
+            line-height: 1.4;
+        }
+        #page-content p {
+            margin-bottom: 1rem;
+            color: #334155;
+            line-height: 1.75;
+            text-align: justify;
+        }
+
+        /* Styling for the highlighted text */
+        .highlight {
+            background-color: #fef08a; /* Tailwind yellow-200 */
+            color: #854d0e; /* Tailwind yellow-800 */
+            border-radius: 0.25rem;
+            padding: 0.1rem 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .highlight:hover {
+            background-color: #fde047; /* Tailwind yellow-300 */
+        }
+        
+        /* Toast Animation */
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-enter {
+            animation: slideUp 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 p-4 md:p-8 flex flex-col items-center">
+
+    <!-- Header -->
+    <header class="w-full max-w-6xl mb-8 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                <i data-lucide="book-open" class="w-8 h-8 text-blue-600"></i>
+                Essay Collaborator
+            </h1>
+            <p class="text-slate-500 mt-1">Read, highlight, and share notes in real-time.</p>
+        </div>
+        <div id="auth-status" class="hidden sm:flex items-center gap-2 text-sm text-slate-500 bg-white px-3 py-1.5 rounded-full shadow-sm border border-slate-200">
+            <div class="w-2 h-2 rounded-full bg-slate-300" id="status-dot"></div>
+            <span id="status-text">Connecting...</span>
+        </div>
+    </header>
+
+    <!-- Main Layout Grid -->
+    <main class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow h-full relative">
+        
+        <!-- Left: Essay Book (Col span 2) -->
+        <section class="lg:col-span-2 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden h-[600px] lg:h-[700px]">
+            <!-- Top Bar -->
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                <span id="page-indicator" class="font-semibold text-slate-700 bg-white px-3 py-1 rounded-md border border-slate-200 text-sm shadow-sm">
+                    Loading...
+                </span>
+                <div class="text-xs text-slate-500 flex items-center gap-1">
+                    <i data-lucide="mouse-pointer-2" class="w-4 h-4"></i>
+                    Select text to highlight
+                </div>
+            </div>
+            
+            <!-- Essay Content -->
+            <div id="page-content" class="p-6 md:p-8 overflow-y-auto flex-grow relative selection:bg-blue-100 selection:text-blue-900">
+                <div class="flex justify-center items-center h-full text-slate-400">
+                    <i data-lucide="loader-2" class="w-8 h-8 animate-spin"></i>
+                </div>
+            </div>
+            
+            <!-- Navigation Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center mt-auto">
+                <button id="prev-btn" disabled class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i> Previous
+                </button>
+                <button id="next-btn" disabled class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+                    Next <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Right: Notes Panel (Col span 1) -->
+        <aside class="lg:col-span-1 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden h-[400px] lg:h-[700px]">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200">
+                <h2 class="font-semibold text-slate-800 flex items-center gap-2">
+                    <i data-lucide="pen-line" class="w-5 h-5 text-blue-600"></i>
+                    Shared Notes
+                </h2>
+            </div>
+            <div class="p-4 flex-grow flex flex-col bg-slate-50/50">
+                <textarea id="notes-area" class="w-full flex-grow p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none bg-white shadow-sm transition-all" placeholder="Write your collaborative notes here... Everyone can see these in real-time."></textarea>
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2"></div>
+
+    <!-- Firebase & Logic Scripts -->
+    <script type="module">
+        // Import Modern Firebase v11 SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, setDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // --- FIREBASE CONFIGURATION (PORTFOLIO READY) ---
+        // When deploying to your own portfolio, replace this logic with your actual config.
+        // Example:
+        // const firebaseConfig = { apiKey: "...", authDomain: "...", projectId: "..." };
+        // const app = initializeApp(firebaseConfig);
+        
+        let app, db, auth, user;
+        let isOffline = false;
+        
+        const setupFirebase = () => {
+            try {
+                // This fetches the dynamic config if running in the workspace
+                const configStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+                
+                if (configStr) {
+                    const firebaseConfig = JSON.parse(configStr);
+                    app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+                } else {
+                    // Fallback if no config is found (e.g. copied locally without setting up Firebase)
+                    console.warn("No Firebase config found. Running in local-only demo mode.");
+                    isOffline = true;
+                    updateConnectionStatus('offline');
+                }
+            } catch (e) {
+                console.error("Firebase setup error:", e);
+                isOffline = true;
+                updateConnectionStatus('error');
+            }
+        };
+
+        // Get App ID for the workspace database paths
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'portfolio-demo';
+
+        // --- DATA ---
+        const essays = [
+            `<h3>Some people think that parents should teach their children how to be good members of society. Others, however, believe that school is the best place to learn this. Discuss both views and give your own opinion.</h3>
+            <p>Some people believe that children should be taught by their parents about how to function as useful members of society, while others believe that sending children to educational institutions is the best way for them to study this. Although the latter opinion can be beneficial in some cases, I believe that family upbringing plays a more important role in educating children to be good parts of the community.</p>
+            <p>Schools can be considered suitable places for children to learn to be good citizens. With standardized educational methods, schools can foster children’s cognitive development so that they are able to contribute to society in the future. For example, Trung Vuong school and Vinschool are well known for having nurtured successful alumni such as Professor Ngo Bao, Professor Nguyen Hung who have devoted their talents to the development of the country. However, these people only represent a small fraction of the total number of students attending schools, and thus sending children to schools cannot be the best method of educating them to be good members of society.</p>
+            <p>I believe that parents play a more important role in teaching them how to be good citizens. In Vietnam, the average class size is 20 students, which makes it difficult for educators to provide proper schooling for each student. One to one lessons at home, on the other hand, allow children to progress faster. Furthermore, parents form stronger bonds with their offspring and thus, it is easier for them to shape children’s personalities at an early age. For example, by telling stories such as Robin Hood, Cinderella before bedtime, parents can instil a sense of compassion and integrity into them. These children are likely to become good members of society when they grow up.</p>
+            <p>In conclusion, although sending children to schools can be seen as a way of teaching them how to be good citizens, I believe that domestic upbringing has a bigger impact on determining who they are in the future.</p>`,
+            
+            `<h3>There is an increasing trend around the world of married couples deciding not to have children. Discuss the advantages and disadvantages for couples who decide to do this.</h3>
+            <p>An increasing number of married couples around the world choosing to remain childless. The main benefits of not having a child for couples are that they can focus on their careers and have more time for themselves. The main drawbacks are that they could not fit into their peers’ group and have no one to look after them when they get old.</p>
+            <p>One primary advantage of remaining childless for married couples is that they can focus on their work. This is because they have less responsibility and distractions in their lives compared to the couples that have a child. Another advantage of this is that they have more spare time. Looking after a child is a full-time job for parents and taking most of their time, while child-free couples have lots of free time after work. For example, many couples stop going out late with their friends after having a child as they have to stay at home for looking after their children.</p>
+            <p>One disadvantage of couples deciding not to have children is that they can struggle to hang with their peers after most of them have children. Most parents prefer to spend more time with other couples that have children as well. Moreover, do not have anyone to look after them in their elderliness is another disadvantage. Children are the ones who take care of their parents when they get old because their parents did the same for them when they were young. For instance, the vast majority of the people who live in care homes have no child.</p>
+            <p>In conclusion, the main benefits of staying child-free for couples are that they can be more career-oriented and have more free time for themselves, and the main drawbacks are that they could have problems about fitting into their friends’ group and having no one to take care of them when they become older.</p>`,
+            
+            `<h3>In many professional sports, there is an increase in the number of athletes using banned substances to improve their performance. What are the causes of the phenomenon and what are some of the possible solutions?</h3>
+            <p>In many professional sports, it is becoming commonplace for athletes to abuse prohibited substances to boost their overall performance. This essay will discuss how stiff competition and lax testing systems are the main cause of this problem, and the most suitable solutions are imposing heavier punishments on violators and revamping testing facilities.</p>
+            <p>The main cause of this problem is the fierce competition that exists in any sports. In other words, most many professional athletes feel that they have to take substances like steroids to give themselves an advantage over other strong opponents. Another reason is the lack of strictness in testing procedures. Many athletes who take advantage of banned substances can still get off scot-free due to the holes in testing systems. For example, a high-profile mix martial artist named Jon John who is notorious for using PED described how easy it was to get away with cheating in an interview in 2015.</p>
+            <p>A viable solution is to heavily punish lawbreakers. If sports clubs and establishments raise the fine for using banned substances, many athletes will think twice before making attempt to cheat. Another the way to deal with this issue is to upgrade testing amenities. This will eradicate any holes existing in the system and ensure that the test result is highly accurate. For instance, after the UFC had made major investments to provide their staff with the latest testing equipment, many fighters in their organization got caught.</p>
+            <p>In conclusion, strong competition and ineffective testing systems are the main cause of this problem, and the most suitable solutions are enforcing harsher punishments on violators and reforming testing facilities.</p>`,
+
+            `<h3>Details of politicians’ private lives should not be published in newspapers. To what extent do you agree or disagree?</h3>
+            <p>It is thought that the information regarding politicians’ personal lives should not be shared in print media. This essay strongly agrees with this suggestion because publishing these details could be harmful to their families, and obtaining this type of information might require breaking the law.</p>
+            <p>First and foremost, what makes that the details related to private aspects of politicians’ lives should not be shared in newspapers is that it could be harmful not only to these individuals but also to their families. This is because revealing some details from their personal lives could expose them to unwanted comments or allegations, which might lead to a great deal of distress. In Poland, for instance, in 2015, the vice-prime minister committed suicide due to not handling the pressure caused by the paparazzi invading his and his family’s private life.</p>
+            <p>Furthermore, obtaining this type of information, in most cases, means breaking the law. This is because the right to privacy is one of the most fundamental policies in society, and anyone who wants to access the lives of politicians must obtain their consent. However, not only are paparazzi hired to invade properties belonging to politicians to take photos without their permission, but also politicians’ colleagues and relatives are bribed to share confidential facts from their lives. For instance, an accident in which Princess Diana was killed was partly caused by the paparazzi who followed her car, trying to take photos of her and her boyfriend against their will.</p>
+            <p>In conclusion, I strongly support the suggestion that politicians’ lives should not be subject to the interest of newspapers because revealing personal facts from politicians lives could destroy their family life and the process of obtaining these details often required wrongdoing.</p>`,
+
+            `<h3>Some say that music, art and drama are as important as other school subjects, especially at the primary level. Do you agree or disagree?</h3>
+            <p>Some people believe that arts-related subjects are as important as other school subjects, especially for primary school children. I totally agree with this statement because this can help children to discover their talents from an early age and can increase their confidence.</p>
+            <p>One of the reasons I agree that creative subjects have the same importance as other school courses in primary school is that it allows students to find out their potential talents early on. That is to say, school-age is the most convenient time for students to learn more about their interests by trying different activities as they are young enough to pursue their hobbies. They will probably not have any other chance later in their lives to discover that because they will be busy with difficult exams when they get older. For example, most famous singers were discovered by their music teachers at school from a young age, and they claimed that they could not be that successful if their teachers did not find out their talents when they were young.</p>
+            <p>Moreover, music, art and drama subjects help students to boost their confidence. That is because creative lessons teach students how to perform in front of lots of people and give them a chance to socialise with other students. As a result, students can realise their real potential and act more confidently. For instance, many psychologists suggest to students who are struggling with social anxiety to take drama lessons as it helps to enhance confidence.</p>
+            <p>In conclusion, this essay completely agrees that music, art and drama have the same value as other subjects in primary school because it allows children to discover their hidden talents early on and increases their self-confidence.</p>`
+        ];
+
+        // --- DOM Elements ---
+        const pageContentEl = document.getElementById('page-content');
+        const pageIndicatorEl = document.getElementById('page-indicator');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const notesArea = document.getElementById('notes-area');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const toastContainer = document.getElementById('toast-container');
+
+        // --- State ---
+        let currentPageIndex = 0;
+        let unsubscribe; 
+        
+        // Local state cache for offline mode demo
+        const localCache = {};
+
+        // --- UI Utilities ---
+        function updateConnectionStatus(status) {
+            if(status === 'online') {
+                statusDot.className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
+                statusText.textContent = "Live";
+            } else if (status === 'error') {
+                statusDot.className = "w-2 h-2 rounded-full bg-red-500";
+                statusText.textContent = "Connection Error";
+            } else if (status === 'offline') {
+                statusDot.className = "w-2 h-2 rounded-full bg-yellow-500";
+                statusText.textContent = "Local Mode";
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-slate-800' : (type === 'error' ? 'bg-red-600' : 'bg-blue-600');
+            const icon = type === 'success' ? 'check-circle-2' : (type === 'error' ? 'alert-circle' : 'info');
+            
+            toast.className = `${bgClass} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 text-sm font-medium toast-enter`;
+            toast.innerHTML = `
+                <i data-lucide="${icon}" class="w-4 h-4"></i>
+                ${message}
+            `;
+            
+            toastContainer.appendChild(toast);
+            lucide.createIcons({ root: toast });
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(100%)';
+                toast.style.transition = 'all 0.3s ease-in';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- Authentication ---
+        async function authenticateAndInit() {
+            setupFirebase();
+
+            if (isOffline) {
+                // Fallback Initialization
+                displayEssay(currentPageIndex);
+                return;
+            }
+
+            try {
+                // Canvas Rule 3: Auth BEFORE Queries
+                const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                if (token) {
+                    await signInWithCustomToken(auth, token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Listen for state
+                onAuthStateChanged(auth, (currentUser) => {
+                    if (currentUser) {
+                        user = currentUser;
+                        updateConnectionStatus('online');
+                        // Initialize app data loading once authenticated
+                        displayEssay(currentPageIndex);
+                    }
+                });
+            } catch (error) {
+                console.error("Auth failed:", error);
+                showToast("Could not connect to live servers. Read-only mode.", "error");
+                updateConnectionStatus('error');
+                isOffline = true;
+                displayEssay(currentPageIndex);
+            }
+        }
+
+        // --- Data Handling ---
+        function getEssayDocRef(index) {
+            // Canvas Rule 1: Strict paths
+            // Using public data path because this is a collaborative viewer where multiple users share notes
+            return doc(db, 'artifacts', appId, 'public', 'data', 'essays', `essay-${index}`);
+        }
+
+        function setupRealtimeListener(index) {
+            if (unsubscribe) {
+                unsubscribe();
+            }
+
+            if (isOffline) {
+                // Local simulation for portfolio demo when no config is present
+                let baseContent = essays[index];
+                if (localCache[index]) {
+                    if (localCache[index].contentHTML) baseContent = localCache[index].contentHTML;
+                    notesArea.value = localCache[index].notes || '';
+                } else {
+                    notesArea.value = '';
+                }
+                pageContentEl.innerHTML = baseContent;
+                return;
+            }
+
+            if (!user) return; // Guard clause
+
+            const docRef = getEssayDocRef(index);
+            
+            // Canvas Rule: Error Callbacks Required
+            unsubscribe = onSnapshot(docRef, 
+                (docSnap) => {
+                    let baseContent = essays[index];
+                    
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if (data.contentHTML) {
+                            baseContent = data.contentHTML;
+                        }
+                        // Update notes from the database, ensure we don't overwrite if actively typing 
+                        // (Basic implementation: overwrite anyway for true sync, but usually requires cursor management)
+                        if (document.activeElement !== notesArea) {
+                            notesArea.value = data.notes || '';
+                        }
+                    } else {
+                        notesArea.value = '';
+                    }
+                    
+                    pageContentEl.innerHTML = baseContent;
+                },
+                (error) => {
+                    console.error("Snapshot error:", error);
+                    showToast("Error syncing real-time data.", "error");
+                }
+            );
+        }
+
+        async function saveDataToFirebase() {
+            if (isOffline) {
+                localCache[currentPageIndex] = {
+                    notes: notesArea.value,
+                    contentHTML: pageContentEl.innerHTML
+                };
+                showToast("Saved locally (Demo Mode)");
+                return;
+            }
+
+            if (!user) return;
+
+            try {
+                const docRef = getEssayDocRef(currentPageIndex);
+                const payload = {
+                    notes: notesArea.value,
+                    contentHTML: pageContentEl.innerHTML,
+                    lastUpdatedBy: user.uid,
+                    updatedAt: new Date().toISOString()
+                };
+                await setDoc(docRef, payload, { merge: true });
+            } catch (error) {
+                console.error("Error saving data:", error);
+                showToast("Could not save changes to cloud.", "error");
+            }
+        }
+
+        // --- UI Interactions ---
+        function displayEssay(index) {
+            pageContentEl.innerHTML = `<div class="flex justify-center items-center h-full text-slate-400"><i data-lucide="loader-2" class="w-8 h-8 animate-spin"></i></div>`;
+            lucide.createIcons({ root: pageContentEl });
+            
+            pageIndicatorEl.textContent = `Essay ${index + 1} of ${essays.length}`;
+            prevBtn.disabled = (index === 0);
+            nextBtn.disabled = (index === essays.length - 1);
+            
+            setupRealtimeListener(index);
+        }
+
+        function highlightSelection() {
+            const selection = window.getSelection();
+            if (!selection.rangeCount || selection.isCollapsed) return;
+            
+            const range = selection.getRangeAt(0);
+            
+            // Ensure selection is inside the essay content
+            if (!pageContentEl.contains(range.commonAncestorContainer)) return;
+
+            const highlightSpan = document.createElement('span');
+            highlightSpan.className = 'highlight';
+            highlightSpan.title = 'Click to remove highlight';
+
+            try {
+                // Warning: surroundContents can fail if the selection crosses paragraph boundaries
+                range.surroundContents(highlightSpan);
+                saveDataToFirebase();
+            } catch (e) {
+                console.warn("Could not highlight selection across multiple elements.", e);
+                showToast("Please highlight text within a single paragraph.", "error");
+            } finally {
+                selection.removeAllRanges();
+            }
+        }
+
+        function removeHighlight(event) {
+            if (event.target.classList.contains('highlight')) {
+                const span = event.target;
+                const parent = span.parentNode;
+                
+                // Replace the span with its text content
+                const textNode = document.createTextNode(span.textContent);
+                parent.replaceChild(textNode, span);
+                
+                // Merge adjacent text nodes to prevent fragmentation
+                parent.normalize(); 
+                
+                saveDataToFirebase();
+            }
+        }
+
+        // --- Event Listeners ---
+        nextBtn.addEventListener('click', () => {
+            if (currentPageIndex < essays.length - 1) {
+                currentPageIndex++;
+                displayEssay(currentPageIndex);
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentPageIndex > 0) {
+                currentPageIndex--;
+                displayEssay(currentPageIndex);
+            }
+        });
+
+        pageContentEl.addEventListener('mouseup', () => {
+            // Small delay to allow double-clicks to select words naturally
+            setTimeout(highlightSelection, 50);
+        });
+        
+        pageContentEl.addEventListener('click', removeHighlight);
+        
+        // Debounce saving notes
+        let timeoutId;
+        notesArea.addEventListener('input', () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                saveDataToFirebase();
+            }, 800); // Wait 800ms after last keystroke to save
+        });
+
+        // --- App Start ---
+        authenticateAndInit();
+
+    </script>
+</body>
+</html>
